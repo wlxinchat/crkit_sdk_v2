@@ -189,18 +189,26 @@ cv::Mat Preprocessor::resizeWithPadding(const cv::Mat& img) {
 }
 
 void Preprocessor::normalize(cv::Mat& img) {
-    // 应用归一化: (x - mean) / std
+    // 检查是否需要归一化
+    bool need_normalize = false;
     for (int c = 0; c < 3; c++) {
         if (std::abs(mean_[c]) > 1e-6 || std::abs(std_[c] - 1.0f) > 1e-6) {
-            // 需要归一化
-            for (int h = 0; h < img.rows; h++) {
-                for (int w = 0; w < img.cols; w++) {
-                    img.at<cv::Vec3f>(h, w)[c] =
-                        (img.at<cv::Vec3f>(h, w)[c] - mean_[c]) / std_[c];
-                }
-            }
+            need_normalize = true;
+            break;
         }
     }
+
+    if (!need_normalize) {
+        return;
+    }
+
+    // 使用OpenCV向量化操作进行归一化: (img - mean) / std
+    cv::Scalar mean_scalar(mean_[0], mean_[1], mean_[2]);
+    cv::Scalar std_scalar(std_[0], std_[1], std_[2]);
+
+    // img = (img - mean) / std
+    cv::subtract(img, mean_scalar, img);
+    cv::divide(img, std_scalar, img);
 }
 
 void Preprocessor::hwcToChw(const cv::Mat& src, float* dst) {

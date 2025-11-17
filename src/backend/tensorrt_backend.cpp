@@ -15,6 +15,17 @@
 
 namespace crkit {
 
+// CUDA错误检查宏
+#define CUDA_CHECK(call)                                                      \
+    do {                                                                      \
+        cudaError_t err = call;                                              \
+        if (err != cudaSuccess) {                                            \
+            LOG_ERROR("CUDA error at %s:%d: %s", __FILE__, __LINE__,        \
+                     cudaGetErrorString(err));                               \
+            return CRKIT_ERROR_DEVICE_ERROR;                                 \
+        }                                                                     \
+    } while (0)
+
 // TensorRT Logger实现
 void TRTLogger::log(Severity severity, const char* msg) noexcept {
     switch (severity) {
@@ -55,8 +66,8 @@ TensorRTBackend::~TensorRTBackend() {
 
     if (device_buffers_[0]) cudaFree(device_buffers_[0]);
     if (device_buffers_[1]) cudaFree(device_buffers_[1]);
-    if (host_buffers_[0]) free(host_buffers_[0]);
-    if (host_buffers_[1]) free(host_buffers_[1]);
+    if (host_buffers_[0]) cudaFreeHost(host_buffers_[0]);
+    if (host_buffers_[1]) cudaFreeHost(host_buffers_[1]);
 
     if (stream_) {
         cudaStreamDestroy(stream_);
@@ -161,12 +172,12 @@ create_context:
     output_size_ *= sizeof(float);
 
     // 分配GPU内存
-    cudaMalloc(&device_buffers_[0], input_size_);
-    cudaMalloc(&device_buffers_[1], output_size_);
+    CUDA_CHECK(cudaMalloc(&device_buffers_[0], input_size_));
+    CUDA_CHECK(cudaMalloc(&device_buffers_[1], output_size_));
 
     // 分配主机内存 (固定内存以提高传输速度)
-    cudaMallocHost(&host_buffers_[0], input_size_);
-    cudaMallocHost(&host_buffers_[1], output_size_);
+    CUDA_CHECK(cudaMallocHost(&host_buffers_[0], input_size_));
+    CUDA_CHECK(cudaMallocHost(&host_buffers_[1], output_size_));
 
     LOG_INFO("TensorRT model loaded successfully");
     LOG_INFO("Input size: %zu bytes, Output size: %zu bytes",
@@ -182,8 +193,8 @@ CRKitStatus TensorRTBackend::infer(const Tensor& input, Tensor& output) {
     }
 
     // 拷贝输入数据到GPU
-    cudaMemcpyAsync(device_buffers_[0], input.data, input_size_,
-                    cudaMemcpyHostToDevice, stream_);
+    CUDA_CHECK(cudaMemcpyAsync(device_buffers_[0], input.data, input_size_,
+                               cudaMemcpyHostToDevice, stream_));
 
     // 执行推理
     void* bindings[2] = {device_buffers_[0], device_buffers_[1]};
@@ -195,11 +206,11 @@ CRKitStatus TensorRTBackend::infer(const Tensor& input, Tensor& output) {
     }
 
     // 拷贝输出数据到主机
-    cudaMemcpyAsync(host_buffers_[1], device_buffers_[1], output_size_,
-                    cudaMemcpyDeviceToHost, stream_);
+    CUDA_CHECK(cudaMemcpyAsync(host_buffers_[1], device_buffers_[1], output_size_,
+                               cudaMemcpyDeviceToHost, stream_));
 
     // 等待完成
-    cudaStreamSynchronize(stream_);
+    CUDA_CHECK(cudaStreamSynchronize(stream_));
 
     // 设置输出张量
     output.shape = getOutputShape();

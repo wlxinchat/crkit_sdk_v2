@@ -220,7 +220,7 @@ cmake .. \
 ### 问题反馈
 
 - GitHub Issues: [提交问题](https://github.com/yourusername/crkit_sdk_v2/issues)
-- 邮件支持: support@example.com
+- 邮件支持: wlxinchat@gmail.com
 
 ## 许可证
 

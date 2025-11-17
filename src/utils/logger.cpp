@@ -99,8 +99,16 @@ const char* Logger::levelToString(LogLevel level) {
 
 std::string Logger::getCurrentTime() {
     time_t now = time(nullptr);
+    struct tm tm_buf;
     char buf[64];
-    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+    #ifdef _WIN32
+    localtime_s(&tm_buf, &now);  // Windows版本
+    #else
+    localtime_r(&now, &tm_buf);  // POSIX版本
+    #endif
+
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm_buf);
     return std::string(buf);
 }
 

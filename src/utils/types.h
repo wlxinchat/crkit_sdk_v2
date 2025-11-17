@@ -56,7 +56,7 @@ struct Detection {
                   class_id(-1), confidence(0.0f) {}
 
     Detection(float x, float y, float w, float h, int cls, float conf)
-        : x(x), y(y), width(width), height(h),
+        : x(x), y(y), width(w), height(h),
           class_id(cls), confidence(conf) {}
 };
 
