@@ -80,17 +80,11 @@ endif()
 # 源文件
 set(CRKIT_CORE_SOURCES
     src/api/crkit_api.cpp
-    src/core/engine.cpp
-    src/core/model_manager.cpp
-    src/core/inference_engine.cpp
-    src/core/input_processor.cpp
     src/core/preprocessor.cpp
     src/core/postprocessor.cpp
-    src/core/async_executor.cpp
-    src/core/batch_processor.cpp
+    src/backend/backend_factory.cpp
     src/utils/logger.cpp
     src/utils/error.cpp
-    src/utils/timer.cpp
 )
 
 # 后端源文件

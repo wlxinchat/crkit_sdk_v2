@@ -1,0 +1,86 @@
+# 编译输出
+build/
+build-*/
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+!cmake/*.cmake
+compile_commands.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# TensorRT缓存
+*.trt
+*.engine
+*.plan
+
+# 日志文件
+*.log
+
+# 测试文件
+test_images/
+*.jpg
+*.png
+*.mp4
+*.avi
+!docs/*.png
+!docs/*.jpg
+
+# 模型文件
+*.onnx
+*.pt
+*.pth
+*.weights
+*.pb
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+venv/
+env/
+
+# 临时文件
+*.tmp
+*.bak
+*.orig
+.cache/
+
+# 文档生成
+docs/_build/
+docs/html/
+docs/latex/
+
+# 包文件
+*.tar.gz
+*.zip
+*.deb
+*.rpm
+
+# 性能分析
+*.prof
+*.gcda
+*.gcno
+*.gcov
+perf.data*
+callgrind.*
